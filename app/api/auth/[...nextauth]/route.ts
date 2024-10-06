@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 
-const { AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID, NEXTAUTH_SECRET } =
+const { AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID } =
     process.env;
 
 if (!AZURE_AD_CLIENT_ID || !AZURE_AD_CLIENT_SECRET || !AZURE_AD_TENANT_ID || NEXTAUTH_SECRET) {
@@ -11,9 +11,9 @@ if (!AZURE_AD_CLIENT_ID || !AZURE_AD_CLIENT_SECRET || !AZURE_AD_TENANT_ID || NEX
 const handler = NextAuth({
     providers: [
         AzureADProvider({
-            clientId: AZURE_AD_CLIENT_ID,
-            clientSecret: AZURE_AD_CLIENT_SECRET,
-            tenantId: AZURE_AD_TENANT_ID,
+            clientId: process.env.AZURE_AD_CLIENT_ID,
+            clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
+            tenantId: process.env.AZURE_AD_TENANT_ID,
         }),
     ],
     callbacks: {
@@ -28,7 +28,7 @@ const handler = NextAuth({
             return session;
         },
     },
-    secret: NEXTAUTH_SECRET, // Set a secret for NextAuth
+    secret: process.env.NEXTAUTH_SECRET, // Set a secret for NextAuth
 });
 
 export { handler as GET, handler as POST };
