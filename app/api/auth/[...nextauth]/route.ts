@@ -4,7 +4,7 @@ import AzureADProvider from "next-auth/providers/azure-ad";
 const { AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET, AZURE_AD_TENANT_ID, NEXTAUTH_SECRET } =
     process.env;
 
-if (!AZURE_AD_CLIENT_ID || !AZURE_AD_CLIENT_SECRET || !AZURE_AD_TENANT_ID) {
+if (!AZURE_AD_CLIENT_ID || !AZURE_AD_CLIENT_SECRET || !AZURE_AD_TENANT_ID || NEXTAUTH_SECRET) {
     throw new Error("The Azure AD environment variables are not set.");
 }
 
@@ -28,7 +28,7 @@ const handler = NextAuth({
             return session;
         },
     },
-    secret: process.env.NEXTAUTH_SECRET, // Set a secret for NextAuth
+    secret: NEXTAUTH_SECRET, // Set a secret for NextAuth
 });
 
 export { handler as GET, handler as POST };
