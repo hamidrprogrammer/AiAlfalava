@@ -1,0 +1,67 @@
+.card {
+    width: 300px;
+    height: 400px;
+    margin: 50px auto;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-content {
+    text-align: center;
+}
+
+.card-logo {
+    width: 200px;
+    height: 70px;
+    margin-bottom: 20px;
+}
+
+.login-button {
+    display: flex;
+    align-items: center;
+    background-color: #0078D4;
+    /* Microsoft's blue color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #005A9E;
+    /* Darker blue on hover */
+}
+
+.login-icon {
+    margin-right: 10px;
+    /* Add some space between the icon and text */
+    font-size: 20px;
+    /* Adjust the icon size */
+}
+
+.card-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.card-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.card-button:hover {
+    background-color: #0056b3;
+}
