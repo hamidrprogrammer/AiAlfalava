@@ -1,5 +1,6 @@
 import { useDebouncedCallback } from "use-debounce";
 import { memo, useState, useRef, useEffect, useLayoutEffect } from "react";
+import axios from "axios";
 
 import SendWhiteIcon from "../icons/send-white.svg";
 import Upload from "../icons/upload.svg";
@@ -16,7 +17,7 @@ import BotIcon from "../icons/bot.svg";
 import UserIcon from "../icons/user-svg.svg"; //Use this for user avatar instead of emoji
 import AddIcon from "../icons/add.svg";
 import DeleteIcon from "../icons/delete.svg";
-
+import { ActionIcon, ChatInputActionBar, ChatInputArea, ChatSendButton, DraggablePanel, FileTypeIcon, TokenTag } from '@lobehub/ui';
 import {
   Message,
   SubmitKey,
@@ -28,9 +29,11 @@ import {
 
 import {
   copyToClipboard,
+  disLikeClipboard,
   downloadAs,
   getEmojiUrl,
   isMobileScreen,
+  likeClipboard,
   selectOrCopy,
 } from "../utils";
 
@@ -46,6 +49,9 @@ import chatStyle from "./chat.module.scss";
 
 import { Input, Modal, showModal, showToast } from "./ui-lib";
 import Image from "next/image";
+import { Flexbox } from "react-layout-kit";
+import { Eraser, FileUpIcon, Languages, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const Markdown = dynamic(
   async () => memo((await import("./markdown")).Markdown),
@@ -153,6 +159,31 @@ function PromptToast(props: {
       session.context[i] = prompt;
     });
   };
+  const { data: sessionUser, status, update } = useSession();
+
+  const handleSubmit = async () => {
+
+
+    const feedbackData = {
+      name:sessionUser?.user?.name,
+      username:sessionUser?.user?.email,
+      message,
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      const response = await axios.post("https://bu-fos-mastermind.solutions-apps.com/ai/feedbacks", feedbackData);
+      toast("Your feedback was successfully sent!")
+      console.log("Feedback response:", response.data);
+      // Clear the form
+      
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast('Failed to submit feedback. Please try again."')
+
+    }
+  };
+  const [message, setMessage] = useState("");
 
   return (
     <div className={chatStyle["prompt-toast"]} key="prompt-toast">
@@ -184,6 +215,7 @@ function PromptToast(props: {
                     type="text"
                     className={chatStyle["context-content"]}
                     rows={1}
+                    onInput={(e)=>{setMessage(e.currentTarget.value)}}
 
                   />
                   {/* <IconButton
@@ -202,8 +234,8 @@ function PromptToast(props: {
                     bordered
                     className={chatStyle["context-prompt-button"]}
                     onClick={() => {
-
-                      toast("Your feedback was successfully sent!")
+                      handleSubmit();
+                    
                       props.setShowModal(false)
                     }
                     }
@@ -375,12 +407,15 @@ export function Chat(props: {
       }
     }
   };
+  const { data: sessionUser, status, update } = useSession();
 
   // submit user input
   const onUserSubmit = () => {
     if (userInput.length <= 0) return;
     setIsLoading(true);
-    chatStore.onUserInput(userInput).then(() => setIsLoading(false));
+    chatStore.onUserInput(userInput,sessionUser).then(() => setIsLoading(false));
+
+    chatStore.editedSessionSendEnter(userInput)
     setBeforeInput(userInput);
     setUserInput("");
     setPromptHints([]);
@@ -467,7 +502,7 @@ export function Chat(props: {
 
   const config = useChatStore((state) => state.config);
 
-  const context: RenderMessage[] = session.context.slice();
+  const context: RenderMessage[] = session?.context?.slice() || [];
 
   if (
     context.length === 0 &&
@@ -516,7 +551,7 @@ export function Chat(props: {
   }, []);
 
   return (
-    <div className={styles.chat} key={session.id}>
+    <div className={styles.chat} key={session.id} style={{backgroundColor:"#F8F8F8"}}>
       <div className={styles["window-header"]}>
         <div className={styles["window-header-title"]}>
           <div
@@ -633,6 +668,18 @@ export function Chat(props: {
                         >
                           {Locale.Chat.Actions.Copy}
                         </div>
+                        <div
+                          className={styles["chat-message-top-action"]}
+                          onClick={() => likeClipboard(message?.content,props.user)}
+                        >
+                               <ThumbsDown size={15}/>
+                        </div>
+                        <div
+                          className={styles["chat-message-top-action"]}
+                          onClick={() => disLikeClipboard(message?.content,props.user)}
+                        >
+                          <ThumbsUp size={15}/>
+                        </div>
                       </div>
                     )}
                   {(message.preview || message?.content?.length === 0) &&
@@ -667,7 +714,61 @@ export function Chat(props: {
 
       <div className={styles["chat-input-panel"]}>
         <PromptHints prompts={promptHints} onPromptSelect={onPromptSelect} />
-        <div className={styles["chat-input-panel-inner"]}>
+        <DraggablePanel placement={"bottom"}        >
+        <Flexbox style={{ height: 180, position: 'relative' }}>
+      <div style={{ flex: 1 }}></div>
+      <ChatInputArea
+                  autoFocus={!props?.sideBarShowing}
+                  onInput={(e) => onInput(e)}
+                  value={userInput}
+                  style={{paddingLeft:200}}
+                  
+                  placeholder={Locale.Chat.Input(submitKey)}
+                  onSend={onUserSubmit}
+
+
+
+        bottomAddons={
+        
+        <ChatSendButton               onSend={onUserSubmit}
+        />
+       
+       }
+        
+
+        topAddons={
+          <ChatInputActionBar
+            leftAddons={
+              <>
+                <ActionIcon icon={FileUpIcon} onClick={() => { handleFileClick() }}/>
+                <ActionIcon icon={Eraser} onClick={() => { onInput('')}}/>
+                <TokenTag maxValue={5000} value={1000} />
+                {selectedFile && (
+                <FileTypeIcon 
+        color="#f54838"
+        size={50}
+        onClick={() => { handleRemoveFile() }}
+
+        
+                  filetype="png/jpg"/>
+                )}
+                <input
+              type="file"
+              ref={fileInputRef}
+              accept=".png,.jpg,.jpeg"
+              style={{ display: 'none' }} // Hide the file input
+              onChange={handleFileChange}
+            />
+                
+
+              </>
+            }
+          />
+        }
+      />
+    </Flexbox>
+    </DraggablePanel>
+        {/* <div className={styles["chat-input-panel-inner"]}>
           <textarea
             ref={inputRef}
             className={styles["chat-input"]}
@@ -691,13 +792,7 @@ export function Chat(props: {
               noDark
               onClick={onUserSubmit}
             />
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept=".png,.jpg,.jpeg"
-              style={{ display: 'none' }} // Hide the file input
-              onChange={handleFileChange}
-            />
+            
             <IconButton
               icon={<Upload />}
               text={"Upload"}
@@ -715,7 +810,7 @@ export function Chat(props: {
 
           </div>
 
-        </div>
+        </div> */}
       </div>
     </div>
   );

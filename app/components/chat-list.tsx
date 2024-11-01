@@ -11,6 +11,8 @@ import { useChatStore } from "../store";
 
 import Locale from "../locales";
 import { isMobileScreen } from "../utils";
+import { Edit } from "lucide-react";
+import React, { useState } from "react";
 
 export function ChatItem(props: {
   onClick?: () => void;
@@ -19,9 +21,18 @@ export function ChatItem(props: {
   count: number;
   time: string;
   selected: boolean;
+  isEditing:boolean;
   id: number;
   index: number;
+  onEdite?: () => void;
+  onSave?: (text:string) => void;
 }) {
+  const [editTitle, setEditTitle] = React.useState(props.title);
+  const handleSaveEdit = () => {
+    if (props.onSave) {
+      props.onSave(editTitle);
+    }
+  };
   return (
     <Draggable draggableId={`${props.id}`} index={props.index}>
       {(provided) => (
@@ -33,7 +44,19 @@ export function ChatItem(props: {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          <div className={styles["chat-item-title"]}>{props.title}</div>
+          {props.isEditing ? (
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={handleSaveEdit} // Save on blur
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') handleSaveEdit(); // Save on Enter
+              }}
+            />
+          ) : (
+            <div className={styles["chat-item-title"]}>{props.title}</div>
+          )}
           <div className={styles["chat-item-info"]}>
             <div className={styles["chat-item-count"]}>
               {Locale.ChatItem.ChatItemCount(props.count)}
@@ -43,6 +66,9 @@ export function ChatItem(props: {
           <div className={styles["chat-item-delete"]} onClick={props.onDelete}>
             <DeleteIcon />
           </div>
+          <div className={styles["chat-item-delete"]} style={{right:30}} onClick={() => props.onEdite()}>
+            <Edit size={15} onClick={()=>{}}/>
+          </div>
         </div>
       )}
     </Draggable>
@@ -50,13 +76,16 @@ export function ChatItem(props: {
 }
 
 export function ChatList() {
-  const [sessions, selectedIndex, selectSession, removeSession, moveSession] =
+  const [sessions, filter,searchKey,selectedIndex, selectSession,, removeSession, moveSession,] =
     useChatStore((state) => [
       state.sessions,
+      state.filter,
+      state.searchKey,
       state.currentSessionIndex,
       state.selectSession,
       state.removeSession,
       state.moveSession,
+      state.onSearch,
     ]);
   const chatStore = useChatStore();
 
@@ -93,8 +122,13 @@ export function ChatList() {
     // Optionally, append the date for clarity
     return `${title}`; // Combine title and date
   };
-
-
+  const handleEdit = (id, newTitle) => {
+    console.log(newTitle);
+    
+    chatStore.editedSession(newTitle)
+    setEditingId(null); // Exit edit mode after saving
+  };
+  const [editingId, setEditingId] = useState(null);
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="chat-list">
@@ -104,19 +138,39 @@ export function ChatList() {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {sessions.map((item, i) => (
+            {searchKey>0?filter.map((item, i) => (
               <ChatItem
-                title={item.messages.length > 0 ? item.messages[0].content : item.topic}
+                title={item.topic}
                 time={item.lastUpdate}
                 count={item.messages.length}
                 key={item.id}
                 id={item.id}
                 index={i}
+                onSave={(newTitle) => handleEdit(item.id, newTitle)}
                 selected={i === selectedIndex}
                 onClick={() => selectSession(i)}
+                isEditing={editingId === item.id}
                 onDelete={chatStore.deleteSession}
+                onEdite={() => setEditingId(item.id)}
+              />
+            )):
+            sessions.map((item, i) => (
+              <ChatItem
+                title={item.topic}
+                time={item.lastUpdate}
+                count={item.messages.length}
+                key={item.id}
+                id={item.id}
+                index={i}
+                onSave={(newTitle) => handleEdit(item.id, newTitle)}
+                selected={i === selectedIndex}
+                onClick={() => selectSession(i)}
+                isEditing={editingId === item.id}
+                onDelete={chatStore.deleteSession}
+                onEdite={() => setEditingId(item.id)}
               />
             ))}
+           
             {provided.placeholder}
           </div>
         )}

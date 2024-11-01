@@ -199,6 +199,8 @@ function createEmptySession(): ChatSession {
 interface ChatStore {
   config: ChatConfig;
   sessions: ChatSession[];
+  filter: ChatSession[];
+  searchKey: number;
   currentSessionIndex: number;
   clearSessions: () => void;
   removeSession: (index: number) => void;
@@ -206,9 +208,12 @@ interface ChatStore {
   selectSession: (index: number) => void;
   newSession: () => void;
   deleteSession: () => void;
+  editedSession: (text:string) => void;
+  editedSessionSendEnter: (text:string) => void;
+  onSearch: (text:string) => void;
   currentSession: () => ChatSession;
   onNewMessage: (message: Message) => void;
-  onUserInput: (content: string) => Promise<void>;
+  onUserInput: (content: string,user:any) => Promise<void>;
   summarizeSession: () => void;
   updateStat: (message: Message) => void;
   updateCurrentSession: (updater: (session: ChatSession) => void) => void;
@@ -237,7 +242,9 @@ export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => ({
       sessions: [createEmptySession()],
+      filter: [createEmptySession()],
       currentSessionIndex: 0,
+      searchKey:0,
       config: {
         ...DEFAULT_CONFIG,
       },
@@ -245,7 +252,10 @@ export const useChatStore = create<ChatStore>()(
       clearSessions() {
         set(() => ({
           sessions: [createEmptySession()],
+          filter: [createEmptySession()],
           currentSessionIndex: 0,
+          searchKey:0,
+
         }));
       },
 
@@ -268,7 +278,7 @@ export const useChatStore = create<ChatStore>()(
           currentSessionIndex: index,
         });
       },
-
+      
       removeSession(index: number) {
         set((state) => {
           let nextIndex = state.currentSessionIndex;
@@ -345,6 +355,70 @@ export const useChatStore = create<ChatStore>()(
           },
         });
       },
+      onSearch(searchText) {
+        set((state) => {
+          const filter = state.sessions.filter((session) =>
+            session.topic.toLowerCase().includes(searchText.toLowerCase())
+          );
+
+          const searchKey = searchText.length;
+         
+          
+          return {
+            ...state,
+            filter, 
+            searchKey
+            // Store the filtered sessions in the state
+          };
+        });
+      },
+      editedSessionSendEnter(newTitle: string) {
+        const deletedSession = get().currentSession();
+        const index = get().currentSessionIndex;
+        set((state) => {
+          // Copy the sessions array to avoid direct mutation
+          const sessions = [...state.sessions];
+          
+          // Update the title of the specific session
+          console.log(newTitle);
+          
+          if (sessions[index].messages.length<=2) {
+            sessions[index] = {
+              ...sessions[index],
+              topic: newTitle, // Set the new title here
+            };
+          }
+      
+          return {
+            ...state,
+            sessions,
+          };
+        });
+      },
+      editedSession(newTitle: string) {
+        const deletedSession = get().currentSession();
+        const index = get().currentSessionIndex;
+        set((state) => {
+          // Copy the sessions array to avoid direct mutation
+          const sessions = [...state.sessions];
+          
+          // Update the title of the specific session
+          console.log(newTitle);
+          
+          if (sessions[index]) {
+            sessions[index] = {
+              ...sessions[index],
+              topic: newTitle, // Set the new title here
+            };
+          }
+      
+          return {
+            ...state,
+            sessions,
+          };
+        });
+      },
+      
 
       currentSession() {
         let index = get().currentSessionIndex;
@@ -369,7 +443,7 @@ export const useChatStore = create<ChatStore>()(
         // get().summarizeSession();
       },
 
-      async onUserInput(content) {
+      async onUserInput(content,user) {
         const userMessage: Message = createMessage({
           role: "user",
           content,
@@ -394,7 +468,7 @@ export const useChatStore = create<ChatStore>()(
 
         // make request
         console.log("[User Input] ", sendMessages);
-        requestChatStream(sendMessages, {
+        requestChatStream(sendMessages,user, {
           onMessage(content, done) {
             // stream response
             if (done) {

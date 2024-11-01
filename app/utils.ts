@@ -6,26 +6,116 @@ export function trimTopic(topic: string) {
   return topic.replace(/[，。！？”“"、,.!?]*$/, "");
 }
 
-export async function copyToClipboard(text: string) {
+export async function copyToClipboard(content: string) {
+  // Helper function to check if the content is HTML
+  const isHtml = (text) => /<\/?[a-z][\s\S]*>/i.test(text);
+
   try {
-    await navigator.clipboard.writeText(text);
-    showToast(Locale.Copy.Success);
-  } catch (error) {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand("copy");
+    if (navigator.clipboard && navigator.clipboard.write) {
+      if (isHtml(content)) {
+        // Copy as HTML and plain text for applications that support it
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([content], { type: "text/html" }),
+            "text/plain": new Blob([content], { type: "text/plain" })
+          })
+        ]);
+      } else {
+        // Copy as plain text if content has no HTML tags
+        await navigator.clipboard.writeText(content);
+      }
       showToast(Locale.Copy.Success);
-    } catch (error) {
-      showToast(Locale.Copy.Failed);
+    } else {
+      throw new Error("Clipboard API not supported");
     }
-    document.body.removeChild(textArea);
+  } catch (error) {
+    // Fallback for older browsers or failed attempts
+    console.warn("Clipboard API failed; falling back to execCommand method:", error);
+
+    const textArea = document.createElement("textarea");
+    textArea.value = content;
+    textArea.style.position = "fixed";  // Avoid scrolling to bottom
+    textArea.style.opacity = "0";       // Make textarea invisible
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+      if (document.execCommand("copy")) {
+        showToast(Locale.Copy.Success);
+      } else {
+        throw new Error("execCommand failed");
+      }
+    } catch (execError) {
+      console.error("Fallback execCommand failed:", execError);
+
+      showToast("Copying failed. Please manually copy the text.");
+    } finally {
+      document.body.removeChild(textArea);
+    }
   }
 }
+export async function likeClipboard(text: string,user:any) {
+  const feedback = {
+    user_id: user?.user?.email,
+    response_id: "responseId",
+    feedback_type: 'like',
+    timestamp: new Date().toISOString(),
+    comments: text,
+    source: "web_app",
+    session_id: "session_example"
+};
 
+try {
+    const response = await fetch("https://bu-fos-mastermind.solutions-apps.com/ai/feedbackLike", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedback),
+    });
+
+    const data = await response.json();
+    if (data.status === "success") {
+        alert("Feedback submitted successfully!");
+    } else {
+        alert("Error submitting feedback");
+    }
+} catch (error) {
+    console.error("Error:", error);
+    alert("Error submitting feedback");
+}
+}
+export async function disLikeClipboard(text: string,user:any) {
+  const feedback = {
+    user_id: user?.user?.email,
+    response_id: "responseId",
+    feedback_type: 'dislike',
+    timestamp: new Date().toISOString(),
+    comments: text,
+    source: "web_app",
+    session_id: "session_example"
+};
+
+try {
+    const response = await fetch("https://bu-fos-mastermind.solutions-apps.com/ai/feedbackLike", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedback),
+    });
+
+    const data = await response.json();
+    if (data.status === "success") {
+        alert("Feedback submitted successfully!");
+    } else {
+        alert("Error submitting feedback");
+    }
+} catch (error) {
+    console.error("Error:", error);
+    alert("Error submitting feedback");
+}
+}
 export function downloadAs(text: string, filename: string) {
   const element = document.createElement("a");
   element.setAttribute(

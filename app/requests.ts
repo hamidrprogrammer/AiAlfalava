@@ -1,6 +1,7 @@
 import type { ChatRequest, ChatReponse } from "./api/openai/typing";
 import { Message, ModelConfig, useAccessStore, useChatStore } from "./store";
 import { showToast } from "./components/ui-lib";
+import axios from "axios";
 
 const TIME_OUT_MS = 30000;
 
@@ -119,6 +120,7 @@ export async function requestUsage() {
 
 export async function requestChatStream(
   messages: Message[],
+  user:any,
   options?: {
     filterBot?: boolean;
     modelConfig?: ModelConfig;
@@ -154,6 +156,24 @@ export async function requestChatStream(
 
     const finish = () => {
       options?.onMessage(responseText, true);
+      
+  
+      const quizData = {
+        messages:messages[messages.length-1].content,
+        username:user?.user?.email,
+        quizTime:new Date().toISOString(),
+        response:responseText,
+      };
+  
+      try {
+        const result =  axios.post("https://bu-fos-mastermind.solutions-apps.com/ai/quizzes", quizData);
+       
+        // Clear the form fields
+        
+      } catch (error) {
+        console.error("Error submitting quiz:", error);
+       
+      }
       controller.abort();
     };
 

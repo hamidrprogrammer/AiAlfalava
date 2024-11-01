@@ -11,6 +11,7 @@ import SettingsIcon from "../icons/settings.svg";
 import GithubIcon from "../icons/github.svg";
 import ChatGptIcon from "../icons/alfa-laval-1.svg";
 import Logo from "../icons/logo.png";
+import LogoImage from "../icons/chatgpt.svg";  // Renaming the image file import to avoid conflict
 
 import BotIcon from "../icons/bot.svg";
 import UserIcon from "../icons/user-svg.svg";
@@ -28,7 +29,10 @@ import { REPO_URL } from "../constant";
 import { ErrorBoundary } from "./error";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-
+import { Flexbox } from "react-layout-kit";
+import SearchBar from "./searchBar";
+import { ActionIcon,  SideNav } from '@lobehub/ui';
+import { Album, CodeXml, Globe, MessageSquare, MonitorCog, Settings2 } from 'lucide-react';
 export function Loading(props: { noLogo?: boolean }) {
   return (
     <div className={styles["loading-content"]}>
@@ -156,14 +160,15 @@ function _Home({ data }: { data: any }) {
             setShowSideBar(false);
           }}
         >
-          <Image
+          {/* <Image
             src={Logo}
             alt="User Profile"
             objectFit="cover"
             width={128}  // Set width as needed
             height={40} // Set height as needed
             style={{ borderRadius: 8, top: 50, background: "#fff", padding: 8, marginBottom: 20 }}
-          />
+          /> */}
+          <SearchBar onSearch={(e)=>{chatStore.onSearch(e)}}/>
           <ChatList />
         </div>
 
@@ -227,9 +232,45 @@ function _Home({ data }: { data: any }) {
 }
 
 export function Home({ data }: { data: any }) {
+  const handleOpenPage = (url) => {
+    window.open(url, '_blank');
+  };
   return (
+    <Flexbox
+    horizontal
+    width={'100%'}
+    style={{ height: '100vh', width: '100%' }} // Ensures full viewport height
+
+  >
+     <SideNav
+      avatar={<LogoImage size={40} />}
+      bottomActions={<>
+       <ActionIcon icon={Globe}  onClick={() => handleOpenPage('https://www.alfalaval.com/')} />
+      <ActionIcon icon={MonitorCog}  onClick={() => handleOpenPage('https://admin.com')} />
+      <ActionIcon icon={CodeXml}  onClick={() => handleOpenPage('https://solutions-apps.de/')}  />
+      </>}
+      topActions={
+        <>
+          <ActionIcon
+          active={true}
+          
+            icon={MessageSquare}
+          
+            size="large"
+          />
+          <ActionIcon
+           
+            icon={Album}
+           
+            size="large"
+          />
+        </>
+      }
+    />
+    
     <ErrorBoundary>
       <_Home data={data}></_Home>
     </ErrorBoundary>
+    </Flexbox>
   );
 }

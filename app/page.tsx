@@ -6,6 +6,8 @@ import { Home } from "./components/home";
 import Demo from "./lofin";
 import { SessionProvider, useSession } from "next-auth/react";
 import { getSession } from "next-auth/react";
+import { ThemeProvider, GradientButton } from '@lobehub/ui'
+import axios from "axios";
 
 const ProtectedPage = () => {
   return (
@@ -24,8 +26,31 @@ export default function App() {
   console.log("session");
   console.log(session);
   console.log("session");
+  const handleSubmit = async () => {
+   
+
+    const userData = {
+      image :session?.user?.image,
+      name:session?.user?.name,
+      username:session?.user?.email,
+    };
+
+    try {
+      const response = await axios.post("https://bu-fos-mastermind.solutions-apps.com/ai/users", userData);
+     
+      console.log("User creation response:", response.data);
+    
+    } catch (error) {
+      console.error("Error creating user:", error);
+     
+    }
+  };
+  if(session!=null){
+    handleSubmit()
+  }
   return (
     <>
+    <ThemeProvider>
       {session == null ? <Demo /> :
 
 
@@ -33,6 +58,7 @@ export default function App() {
           <Home data={session} />
           <Analytics />
         </>}
+        </ThemeProvider>
     </>
   );
 }
