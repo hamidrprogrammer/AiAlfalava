@@ -76,7 +76,7 @@ export function ChatItem(props: {
 }
 
 export function ChatList() {
-  const [sessions, filter,searchKey,selectedIndex, selectSession,, removeSession, moveSession,] =
+  const [sessions, filter,searchKey,selectedIndex, selectSession, removeSession, moveSession,] =
     useChatStore((state) => [
       state.sessions,
       state.filter,

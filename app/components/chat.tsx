@@ -488,9 +488,9 @@ export function Chat(props: {
     for (let i = botIndex; i >= 0; i -= 1) {
       if (messages[i].role === "user") {
         setIsLoading(true);
-        chatStore
-          .onUserInput(messages[i].content)
-          .then(() => setIsLoading(false));
+        // chatStore
+        //   .onUserInput(messages[i].content)
+        //   .then(() => setIsLoading(false));
         chatStore.updateCurrentSession((session) =>
           session.messages.splice(i, 2),
         );
