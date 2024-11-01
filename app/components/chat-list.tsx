@@ -26,9 +26,8 @@ export function ChatItem(props: {
     <Draggable draggableId={`${props.id}`} index={props.index}>
       {(provided) => (
         <div
-          className={`${styles["chat-item"]} ${
-            props.selected && styles["chat-item-selected"]
-          }`}
+          className={`${styles["chat-item"]} ${props.selected && styles["chat-item-selected"]
+            }`}
           onClick={props.onClick}
           ref={provided.innerRef}
           {...provided.draggableProps}
@@ -76,6 +75,25 @@ export function ChatList() {
 
     moveSession(source.index, destination.index);
   };
+  console.log(sessions);
+  const generateTitleFromMessages = (messages) => {
+    if (messages.length === 0) {
+      return "Untitled Chat"; // Fallback if no messages
+    }
+
+    // Get the first message content
+    const firstMessageContent = messages[0].content;
+    const maxLength = 30; // Set the max length for the title
+
+    // Truncate if necessary
+    const title = firstMessageContent.length > maxLength
+      ? firstMessageContent.substring(0, maxLength) + "..."
+      : firstMessageContent;
+
+    // Optionally, append the date for clarity
+    return `${title}`; // Combine title and date
+  };
+
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -88,7 +106,7 @@ export function ChatList() {
           >
             {sessions.map((item, i) => (
               <ChatItem
-                title={item.topic}
+                title={item.messages.length > 0 ? item.messages[0].content : item.topic}
                 time={item.lastUpdate}
                 count={item.messages.length}
                 key={item.id}

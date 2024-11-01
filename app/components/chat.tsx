@@ -3,7 +3,9 @@ import { memo, useState, useRef, useEffect, useLayoutEffect } from "react";
 
 import SendWhiteIcon from "../icons/send-white.svg";
 import Upload from "../icons/upload.svg";
-
+import FileSvg from "../icons/file-remove-svgrepo-com.svg";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import BrainIcon from "../icons/brain.svg";
 import ExportIcon from "../icons/export.svg";
 import ReturnIcon from "../icons/return.svg";
@@ -43,6 +45,7 @@ import styles from "./home.module.scss";
 import chatStyle from "./chat.module.scss";
 
 import { Input, Modal, showModal, showToast } from "./ui-lib";
+import Image from "next/image";
 
 const Markdown = dynamic(
   async () => memo((await import("./markdown")).Markdown),
@@ -55,14 +58,29 @@ const Emoji = dynamic(async () => (await import("emoji-picker-react")).Emoji, {
   loading: () => <LoadingIcon />,
 });
 
-export function Avatar(props: { role: Message["role"] }) {
+export function Avatar(props: { role: Message["role"], data: any }) {
   const config = useChatStore((state) => state.config);
 
   if (props.role !== "user") {
     return <BotIcon className={styles["user-avtar"]} />;
   }
 
-  return <UserIcon className={styles["user-avtar"]} />;
+  return <>
+    {
+      props.data?.user?.image ? (
+        <Image
+          src={props.data?.user?.image}
+          alt="User Profile"
+          objectFit="cover"
+          width={50}  // Set width as needed
+          height={50} // Set height as needed
+          style={{ borderRadius: 100, top: 50 }}
+        />
+      ) : (
+        <UserIcon className={styles["user-avtar"]} />
+      )
+
+    }</>
 
   // return (
   //   <div className={styles["user-avtar"]}>
@@ -81,7 +99,7 @@ function exportMessages(messages: Message[], topic: string) {
           : `## ${Locale.Export.MessageFromChatGPT}:\n${m.content.trim()}`;
       })
       .join("\n\n");
-  const filename = `${topic}.md`;
+  const filename = `${topic}.pdf`;
 
   showModal({
     title: Locale.Export.Title,
@@ -138,7 +156,7 @@ function PromptToast(props: {
 
   return (
     <div className={chatStyle["prompt-toast"]} key="prompt-toast">
-      {props.showToast && (
+      {/* {props.showToast && (
         <div
           className={chatStyle["prompt-toast-inner"] + " clickable"}
           role="button"
@@ -149,85 +167,45 @@ function PromptToast(props: {
             {Locale.Context.Toast(context.length)}
           </span>
         </div>
-      )}
+      )} */}
       {props.showModal && (
         <div className="modal-mask">
           <Modal
-            title={Locale.Context.Edit}
+            title={"Feedback"}
             onClose={() => props.setShowModal(false)}
-            actions={[
-              <IconButton
-                key="reset"
-                icon={<CopyIcon />}
-                bordered
-                text={Locale.Memory.Reset}
-                onClick={() =>
-                  confirm(Locale.Memory.ResetConfirm) &&
-                  chatStore.resetSession()
-                }
-              />,
-              <IconButton
-                key="copy"
-                icon={<CopyIcon />}
-                bordered
-                text={Locale.Memory.Copy}
-                onClick={() => copyToClipboard(session.memoryPrompt)}
-              />,
-            ]}
+
           >
             <>
               <div className={chatStyle["context-prompt"]}>
-                {context.map((c, i) => (
-                  <div className={chatStyle["context-prompt-row"]} key={i}>
-                    <select
-                      value={c.role}
-                      className={chatStyle["context-role"]}
-                      onChange={(e) =>
-                        updateContextPrompt(i, {
-                          ...c,
-                          role: e.target.value as any,
-                        })
-                      }
-                    >
-                      {ROLES.map((r) => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))}
-                    </select>
-                    <Input
-                      value={c.content}
-                      type="text"
-                      className={chatStyle["context-content"]}
-                      rows={1}
-                      onInput={(e) =>
-                        updateContextPrompt(i, {
-                          ...c,
-                          content: e.currentTarget.value as any,
-                        })
-                      }
-                    />
-                    <IconButton
+
+                <div className={chatStyle["context-prompt-row"]} >
+
+                  <Input
+                    type="text"
+                    className={chatStyle["context-content"]}
+                    rows={1}
+
+                  />
+                  {/* <IconButton
                       icon={<DeleteIcon />}
                       className={chatStyle["context-delete-button"]}
                       onClick={() => removeContextPrompt(i)}
                       bordered
-                    />
-                  </div>
-                ))}
+                    /> */}
+                </div>
+
 
                 <div className={chatStyle["context-prompt-row"]}>
                   <IconButton
                     icon={<AddIcon />}
-                    text={Locale.Context.Add}
+                    text={"Send feedback"}
                     bordered
                     className={chatStyle["context-prompt-button"]}
-                    onClick={() =>
-                      addContextPrompt({
-                        role: "system",
-                        content: "",
-                        date: "",
-                      })
+                    onClick={() => {
+
+                      toast("Your feedback was successfully sent!")
+                      props.setShowModal(false)
+                    }
                     }
                   />
                 </div>
@@ -235,23 +213,11 @@ function PromptToast(props: {
               <div className={chatStyle["memory-prompt"]}>
                 <div className={chatStyle["memory-prompt-title"]}>
                   <span>
-                    {Locale.Memory.Title} ({session.lastSummarizeIndex} of{" "}
+                    {'Your feedback'} ({session.lastSummarizeIndex} of{" "}
                     {session.messages.length})
                   </span>
 
-                  <label className={chatStyle["memory-prompt-action"]}>
-                    {Locale.Memory.Send}
-                    <input
-                      type="checkbox"
-                      checked={session.sendMemory}
-                      onChange={() =>
-                        chatStore.updateCurrentSession(
-                          (session) =>
-                            (session.sendMemory = !session.sendMemory),
-                        )
-                      }
-                    ></input>
-                  </label>
+
                 </div>
                 <div className={chatStyle["memory-prompt-content"]}>
                   {session.memoryPrompt || Locale.Memory.EmptyContent}
@@ -261,6 +227,7 @@ function PromptToast(props: {
           </Modal>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 }
@@ -336,6 +303,7 @@ function useScrollToBottom() {
 export function Chat(props: {
   showSideBar?: () => void;
   sideBarShowing?: boolean;
+  user: any
 }) {
   type RenderMessage = Message & { preview?: boolean };
 
@@ -419,6 +387,36 @@ export function Chat(props: {
     if (!isMobileScreen()) inputRef.current?.focus();
     setAutoScroll(true);
   };
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [base64, setBase64] = useState('');
+  const fileInputRef = useRef(null); // Reference to the hidden file input
+
+  const handleFileClick = () => {
+    fileInputRef.current.click(); // Trigger the hidden file input click
+  };
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setBase64('');
+  };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+  };
+
+  // const handleConvertToBase64 = () => {
+  //   if (selectedFile) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       const imgBase64 = reader.result.split(',')[1]; // Extract base64 part
+  //       const mimeType = selectedFile.type; // Get the correct MIME type
+  //       const imgStr = `data:${mimeType};base64,${imgBase64}`;
+  //       setBase64(imgStr);
+  //     };
+  //     reader.readAsDataURL(selectedFile);
+  //   } else {
+  //     alert('Please select a valid file first.');
+  //   }
+  // };
 
   // stop response
   const onUserStop = (messageId: number) => {
@@ -532,7 +530,7 @@ export function Chat(props: {
               }
             }}
           >
-            {session.topic}
+            {session.messages.length > 0 ? session.messages[0].content : session.topic}
           </div>
           <div className={styles["window-header-sub-title"]}>
             {Locale.Chat.SubTitle(session.messages.length)}
@@ -551,7 +549,7 @@ export function Chat(props: {
             <IconButton
               icon={<BrainIcon />}
               bordered
-              title={Locale.Chat.Actions.CompressedHistory}
+              title={"feedback"}
               onClick={() => {
                 setShowPromptModal(true);
               }}
@@ -601,7 +599,8 @@ export function Chat(props: {
             >
               <div className={styles["chat-message-container"]}>
                 <div className={styles["chat-message-avatar"]}>
-                  <Avatar role={message.role} />
+
+                  <Avatar role={message.role} data={props.user} />
                 </div>
                 {(message.preview || message.streaming) && (
                   <div className={styles["chat-message-status"]}>
@@ -692,13 +691,28 @@ export function Chat(props: {
               noDark
               onClick={onUserSubmit}
             />
-            {/* <IconButton
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".png,.jpg,.jpeg"
+              style={{ display: 'none' }} // Hide the file input
+              onChange={handleFileChange}
+            />
+            <IconButton
               icon={<Upload />}
               text={"Upload"}
               className={styles["chat-input-image"]}
               noDark
-              onClick={onUserSubmit}
-            /> */}
+              onClick={() => { handleFileClick() }}
+            />
+            {selectedFile && (
+              <div className={styles["chat-input-image-file"]}
+                onClick={() => { handleRemoveFile() }}>
+                <FileSvg style={{ with: 50, height: 50 }} />
+
+              </div>
+            )}
+
           </div>
 
         </div>
@@ -706,3 +720,4 @@ export function Chat(props: {
     </div>
   );
 }
+

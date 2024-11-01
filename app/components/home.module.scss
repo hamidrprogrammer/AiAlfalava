@@ -258,8 +258,8 @@
 }
 
 .user-avtar {
-  height: 30px;
-  width: 30px;
+  height: 56px;
+  width: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -434,6 +434,15 @@
 
   position: absolute;
   right: 110px;
+  bottom: 30px;
+}
+
+.chat-input-image-file {
+  height: 50px;
+  color: white;
+
+  position: absolute;
+  right: 140px;
   bottom: 30px;
 }
 

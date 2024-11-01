@@ -140,7 +140,7 @@ export async function requestChatStream(
   const reqTimeoutId = setTimeout(() => controller.abort(), TIME_OUT_MS);
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/prompt", {
+    const res = await fetch("https://bu-fos-mastermind.solutions-apps.com/ai/prompt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -10,6 +10,7 @@ import styles from "./home.module.scss";
 import SettingsIcon from "../icons/settings.svg";
 import GithubIcon from "../icons/github.svg";
 import ChatGptIcon from "../icons/alfa-laval-1.svg";
+import Logo from "../icons/logo.png";
 
 import BotIcon from "../icons/bot.svg";
 import UserIcon from "../icons/user-svg.svg";
@@ -132,7 +133,7 @@ function _Home({ data }: { data: any }) {
               style={{ borderRadius: 100, top: 50 }}
             />
           ) : (
-            null
+            <UserIcon style={{ width: 50, height: 50 }} />
           )}
           <div className={styles["sidebar-title"]}>
             {" "}
@@ -155,6 +156,14 @@ function _Home({ data }: { data: any }) {
             setShowSideBar(false);
           }}
         >
+          <Image
+            src={Logo}
+            alt="User Profile"
+            objectFit="cover"
+            width={128}  // Set width as needed
+            height={40} // Set height as needed
+            style={{ borderRadius: 8, top: 50, background: "#fff", padding: 8, marginBottom: 20 }}
+          />
           <ChatList />
         </div>
 
@@ -207,6 +216,7 @@ function _Home({ data }: { data: any }) {
         ) : (
           <Chat
             key="chat"
+            user={data}
             showSideBar={() => setShowSideBar(true)}
             sideBarShowing={showSideBar}
           />

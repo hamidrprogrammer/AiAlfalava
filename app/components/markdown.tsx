@@ -7,6 +7,7 @@ import RemarkGfm from "remark-gfm";
 import RehypeHighlight from "rehype-highlight";
 import { useRef, useState, RefObject, useEffect } from "react";
 import { copyToClipboard } from "../utils";
+import rehypeRaw from 'rehype-raw'; // Add this to handle raw HTML
 
 export function PreCode(props: { children: any }) {
   const ref = useRef<HTMLPreElement>(null);
@@ -59,17 +60,19 @@ export function Markdown(props: { content: string }) {
         [
           RehypeHighlight,
           {
-            detect: false,
-            ignoreMissing: true,
+            detect: false,   // Disable auto-detection of language
+            ignoreMissing: true,  // Ignore errors for unsupported languages
           },
         ],
+        rehypeRaw, // This allows rendering of raw HTML inside markdown
       ]}
       components={{
         pre: PreCode,
       }}
-      linkTarget={"_blank"}
+
     >
       {props.content}
+
     </ReactMarkdown>
   );
 }

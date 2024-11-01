@@ -1,4 +1,4 @@
-import LogoImage from "./icons/logo.png";  // Renaming the image file import to avoid conflict
+import LogoImage from "./icons/chatgpt.svg";  // Renaming the image file import to avoid conflict
 import { TfiMicrosoftAlt } from "react-icons/tfi";
 
 
@@ -21,14 +21,9 @@ const Login = () => {
         <div className="card">
             <div className="card-content">
                 {/* Use the Next.js Image component for optimized rendering */}
-                <Image
-                    src={LogoImage}  // This will now use LogoImage as the src
-                    alt="Logo"
-
-                    objectFit="cover"
-                    className="card-logo"
-                />
-                <h2 className="card-title">Your App Name</h2>
+                <LogoImage
+                    src={LogoImage} />
+                <h2 className="card-title">BU FOS Mastermin</h2>
                 <button className="login-button"
                     onClick={handleLogin}>
                     <TfiMicrosoftAlt className="login-icon" />
