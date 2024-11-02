@@ -73,16 +73,10 @@ try {
     });
     showToast("Feedback submitted successfully!");
     const data = await response.json();
-    if (data.status === "success") {
-     
-        showToast("Feedback submitted successfully!");
-    } else {
-        
-        showToast("Error submitting feedback");
-    }
+    
 } catch (error) {
     console.error("Error:", error);
-    showToast("Error submitting feedback");
+    // showToast("Error submitting feedback");
 }
 }
 export async function disLikeClipboard(text: string,user:any,data,response) {
@@ -109,11 +103,11 @@ try {
       showToast("Feedback submitted successfully!");
   } else {
       
-      showToast("Error submitting feedback");
+      // showToast("Error submitting feedback");
   }
 } catch (error) {
     console.error("Error:", error);
-    showToast("Error submitting feedback");
+    // showToast("Error submitting feedback");
 }
 }
 export function downloadAs(text: string, filename: string) {
