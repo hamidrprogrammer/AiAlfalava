@@ -54,46 +54,13 @@ export async function copyToClipboard(content: string) {
     }
   }
 }
-export async function likeClipboard(text: string,user:any) {
+export async function likeClipboard(text: string,user:any,data,response) {
   const feedback = {
-    user_id: user?.user?.email,
-    response_id: "responseId",
-    feedback_type: 'like',
-    timestamp: new Date().toISOString(),
-    comments: text,
-    source: "web_app",
-    session_id: "session_example"
-};
-
-try {
-    const response = await fetch("https://bu-fos-mastermind.solutions-apps.com/ai/feedbackLike", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feedback),
-    });
-
-    const data = await response.json();
-    if (data.status === "success") {
-        alert("Feedback submitted successfully!");
-    } else {
-        alert("Error submitting feedback");
-    }
-} catch (error) {
-    console.error("Error:", error);
-    alert("Error submitting feedback");
-}
-}
-export async function disLikeClipboard(text: string,user:any) {
-  const feedback = {
-    user_id: user?.user?.email,
-    response_id: "responseId",
+    user_id: "user?.user?.email",
+    response_id: response,
     feedback_type: 'dislike',
     timestamp: new Date().toISOString(),
-    comments: text,
-    source: "web_app",
-    session_id: "session_example"
+    comments: data,
 };
 
 try {
@@ -107,13 +74,46 @@ try {
 
     const data = await response.json();
     if (data.status === "success") {
-        alert("Feedback submitted successfully!");
+     
+        showToast("Feedback submitted successfully!");
     } else {
-        alert("Error submitting feedback");
+        
+        showToast("Error submitting feedback");
     }
 } catch (error) {
     console.error("Error:", error);
-    alert("Error submitting feedback");
+    showToast("Error submitting feedback");
+}
+}
+export async function disLikeClipboard(text: string,user:any,data,response) {
+  const feedback = {
+    user_id: user?.user?.email,
+    response_id: response,
+    feedback_type: 'dislike',
+    timestamp: new Date().toISOString(),
+    comments: data,
+};
+
+try {
+    const response = await fetch("https://bu-fos-mastermind.solutions-apps.com/ai/feedbackLike", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedback),
+    });
+
+    const data = await response.json();
+    if (data.status === "success") {
+     
+      showToast("Feedback submitted successfully!");
+  } else {
+      
+      showToast("Error submitting feedback");
+  }
+} catch (error) {
+    console.error("Error:", error);
+    showToast("Error submitting feedback");
 }
 }
 export function downloadAs(text: string, filename: string) {

@@ -136,6 +136,8 @@ function exportMessages(messages: Message[], topic: string) {
 function PromptToast(props: {
   showToast?: boolean;
   showModal?: boolean;
+  response?: string;
+  refrence?: string;
   setShowModal: (_: boolean) => void;
 }) {
   const chatStore = useChatStore();
@@ -168,7 +170,10 @@ function PromptToast(props: {
       name:sessionUser?.user?.name,
       username:sessionUser?.user?.email,
       message,
+      response:props?.response,
+      reference:props?.refrence,
       timestamp: new Date().toISOString(),
+      accept :false
     };
 
     try {
@@ -542,6 +547,8 @@ export function Chat(props: {
     );
 
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [reference, setReference] = useState('');
+  const [response, setResponse] = useState('');
 
   // Auto focus
   useEffect(() => {
@@ -608,6 +615,8 @@ export function Chat(props: {
         <PromptToast
           showToast={!hitBottom}
           showModal={showPromptModal}
+          refrence ={reference}
+          response={response}
           setShowModal={setShowPromptModal}
         />
       </div>
@@ -670,15 +679,69 @@ export function Chat(props: {
                         </div>
                         <div
                           className={styles["chat-message-top-action"]}
-                          onClick={() => likeClipboard(message?.content,props.user)}
+                          onClick={() =>{
+                            const index = messages.findIndex(me => me.content === message?.content);
+                            console.log(index);
+                            console.log(message?.content);
+                           
+                          
+                            if (index > 0) {
+                              const data =  messages[index - 1]; 
+                              likeClipboard(message?.content,props.user,data?.content,message?.content)
+                              
+                               // Return the previous message
+                          } 
+
+                            }}
                         >
                                <ThumbsDown size={15}/>
                         </div>
                         <div
                           className={styles["chat-message-top-action"]}
-                          onClick={() => disLikeClipboard(message?.content,props.user)}
+                          onClick={() => {
+                            const index = messages.findIndex(me => me.content === message?.content);
+                            console.log(index);
+                            console.log(message?.content);
+                           
+                          
+                            if (index > 0) {
+                              const data =  messages[index - 1]; 
+                              disLikeClipboard(message?.content,props.user,data?.content,message?.content)
+                              
+                               // Return the previous message
+                          } 
+                           
+                          }}
                         >
                           <ThumbsUp size={15}/>
+                        </div>
+                        <div
+                          className={styles["chat-message-top-action"]}
+                          onClick={() => {
+                            setShowPromptModal(true)
+                            const index = messages.findIndex(me => me.content === message?.content);
+                            console.log(index);
+                            console.log(message?.content);
+                            setResponse(message?.content)
+                          
+                            if (index > 0) {
+                              const data =  messages[index - 1]; 
+                              setReference(data?.content)
+                               // Return the previous message
+                          } 
+                          setShowPromptModal(true)
+
+                           
+                            
+
+                            // if(message?.content)
+                            // setReference(messages[messages?.length-2]?.content)
+                            // setReference(messages[messages?.length-2]?.content)
+
+                           
+                          }}
+                        >
+                          <BrainIcon size={15}/>
                         </div>
                       </div>
                     )}

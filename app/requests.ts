@@ -148,11 +148,12 @@ export async function requestChatStream(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(req),
-      signal: controller.signal,
+    
     });
-    clearTimeout(reqTimeoutId);
+    // clearTimeout(reqTimeoutId);
 
     let responseText = "";
+  
 
     const finish = () => {
       options?.onMessage(responseText, true);
@@ -178,29 +179,39 @@ export async function requestChatStream(
     };
 
     if (res.ok) {
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
+      const data = await res.json();
+      options?.onMessage(data.content, true);
+      const quizData = {
+        messages:messages[messages.length-1].content,
+        username:"user?.user?.email",
+        quizTime:new Date().toISOString(),
+        response:data.content,
+      };
+  
+      const result =  axios.post("https://bu-fos-mastermind.solutions-apps.com/ai/quizzes", quizData);
+      // const reader = res.body?.getReader();
+      // const decoder = new TextDecoder();
 
-      options?.onController?.(controller);
+      // options?.onController?.(controller);
 
-      while (true) {
-        console.log("Now in ChatStream loop");
-        // handle time out, will stop if no response in 10 secs
-        const resTimeoutId = setTimeout(() => finish(), TIME_OUT_MS);
-        const content = await reader?.read();
-        clearTimeout(resTimeoutId);
-        const text = decoder.decode(content?.value);
-        responseText += text;
+      // while (true) {
+      //   console.log("Now in ChatStream loop");
+      //   // handle time out, will stop if no response in 10 secs
+      //   const resTimeoutId = setTimeout(() => finish(), TIME_OUT_MS);
+      //   const content = await reader?.read();
+      //   clearTimeout(resTimeoutId);
+      //   const text = decoder.decode(content?.value);
+      //   responseText += content?.value;
 
-        const done = !content || content.done;
-        options?.onMessage(responseText, false);
+      //   const done = !content || content.done;
+      //   options?.onMessage(responseText, false);
 
-        if (done) {
-          break;
-        }
-      }
+      //   if (done) {
+      //     break;
+      //   }
+      // }
 
-      finish();
+      // finish();
     } else if (res.status === 401) {
       console.error("Unauthorized");
       options?.onError(new Error("Unauthorized"), res.status);

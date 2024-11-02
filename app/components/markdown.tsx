@@ -8,7 +8,12 @@ import RehypeHighlight from "rehype-highlight";
 import { useRef, useState, RefObject, useEffect } from "react";
 import { copyToClipboard } from "../utils";
 import rehypeRaw from 'rehype-raw'; // Add this to handle raw HTML
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+import  mark from "../icons/bot.svg";
 
+import he from "he";
+import { ChatItem } from "@lobehub/ui";
 export function PreCode(props: { children: any }) {
   const ref = useRef<HTMLPreElement>(null);
 
@@ -27,6 +32,7 @@ export function PreCode(props: { children: any }) {
     </pre>
   );
 }
+import  avatar from '../icons/bot.svg';
 
 const useLazyLoad = (ref: RefObject<Element>): boolean => {
   const [isIntersecting, setIntersecting] = useState<boolean>(false);
@@ -52,7 +58,41 @@ const useLazyLoad = (ref: RefObject<Element>): boolean => {
 };
 
 export function Markdown(props: { content: string }) {
+  const cleanText = (text) => {
+    return text.replace(/\s+/g, ' ').trim();
+};
+function formatTextToMarkdown(rawText) {
+  // Remove excessive spaces
+  const cleanedText = rawText.replace(/\s+/g, ' ').trim();
+
+  // Split the text into lines
+  const lines = cleanedText.split('\n');
+
+  // Prepare formatted lines
+  const formattedLines = lines.map(line => {
+      // Convert headings (e.g., "## Heading")
+      if (line.startsWith('##')) {
+          return line.replace(/^#+/, (match) => `${'#'.repeat(match.length)} `);
+      }
+      // Convert bullet points (e.g., "- Item")
+      else if (line.startsWith('-')) {
+          return `- ${line.slice(1).trim()}`;
+      }
+      // Convert numbered list (e.g., "1. Item")
+      else if (/^\d+\.\s/.test(line)) {
+          return line.replace(/^(\d+\.\s)/, `$1 `);
+      }
+      // Return regular text
+      return line;
+  });
+
+  // Join the formatted lines back together
+  return formattedLines.join('\n');
+}
+
   return (
+   
+
     <ReactMarkdown
       remarkPlugins={[RemarkMath, RemarkGfm, RemarkBreaks]}
       rehypePlugins={[
@@ -60,8 +100,8 @@ export function Markdown(props: { content: string }) {
         [
           RehypeHighlight,
           {
-            detect: false,   // Disable auto-detection of language
-            ignoreMissing: true,  // Ignore errors for unsupported languages
+            detect: true,   // Disable auto-detection of language
+            ignoreMissing: false,  // Ignore errors for unsupported languages
           },
         ],
         rehypeRaw, // This allows rendering of raw HTML inside markdown
@@ -71,8 +111,8 @@ export function Markdown(props: { content: string }) {
       }}
 
     >
-      {props.content}
-
+  
+     {props.content }
     </ReactMarkdown>
   );
 }
