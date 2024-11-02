@@ -51,7 +51,7 @@ export default function App() {
   return (
     <>
     <ThemeProvider>
-      {session != null ? <Demo /> :
+      {session == null ? <Demo /> :
 
 
         <>
