@@ -167,8 +167,8 @@ function PromptToast(props: {
 
 
     const feedbackData = {
-      name:sessionUser?.user?.name,
-      username:sessionUser?.user?.email,
+      name:"sessionUser?.user?.name",
+      username:"sessionUser?.user?.email",
       message,
       response:props?.response,
       reference:props?.refrence,
@@ -177,7 +177,7 @@ function PromptToast(props: {
     };
 
     try {
-      const response = await axios.post("https://bu-fos-mastermind.solutions-apps.com/ai/feedbacks", feedbackData);
+      const response = await axios.post("http://127.0.0.1:8000/ai/feedbacks", feedbackData);
       toast("Your feedback was successfully sent!")
       console.log("Feedback response:", response.data);
       // Clear the form

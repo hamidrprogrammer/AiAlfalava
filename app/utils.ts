@@ -57,7 +57,7 @@ export async function copyToClipboard(content: string) {
 export async function likeClipboard(text: string,user:any,data,response) {
   const feedback = {
     user_id: "user?.user?.email",
-    response_id: response,
+    response_id: 1,
     feedback_type: 'dislike',
     timestamp: new Date().toISOString(),
     comments: data,
@@ -71,7 +71,7 @@ try {
         },
         body: JSON.stringify(feedback),
     });
-
+    showToast("Feedback submitted successfully!");
     const data = await response.json();
     if (data.status === "success") {
      
@@ -88,7 +88,7 @@ try {
 export async function disLikeClipboard(text: string,user:any,data,response) {
   const feedback = {
     user_id: user?.user?.email,
-    response_id: response,
+    response_id: 1,
     feedback_type: 'dislike',
     timestamp: new Date().toISOString(),
     comments: data,
@@ -102,7 +102,7 @@ try {
         },
         body: JSON.stringify(feedback),
     });
-
+    showToast("Feedback submitted successfully!");
     const data = await response.json();
     if (data.status === "success") {
      
