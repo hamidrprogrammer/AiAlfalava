@@ -246,7 +246,7 @@ export function Home({ data }: { data: any }) {
       avatar={<LogoImage size={40} />}
       bottomActions={<>
        <ActionIcon icon={Globe}  onClick={() => handleOpenPage('https://www.alfalaval.com/')} />
-      <ActionIcon icon={MonitorCog}  onClick={() => handleOpenPage('https://admin.com')} />
+      <ActionIcon icon={MonitorCog}  onClick={() => handleOpenPage('https://admin.bu-fos-mastermind.solutions-apps.com/')} />
       <ActionIcon icon={CodeXml}  onClick={() => handleOpenPage('https://solutions-apps.de/')}  />
       </>}
       topActions={

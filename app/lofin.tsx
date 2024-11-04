@@ -42,16 +42,17 @@ const Login = () => {
        
        onClick={() => handleLogin()}
        size={'large'}
-       style={{ maxWidth: 220,minHeight:50 ,padding:8,borderRadius:8,backgroundColor:"blue"}}
+       style={{ maxWidth: 300,minHeight:65 ,width:290,height:65,padding:8,borderRadius:8,backgroundColor:"blue"}}
        type={'primary'}
      >
        <Flexbox align={'center'} gap={4} horizontal justify={'center'}>
-        {"LOGIN WITH Microsoft"}
+       
         
-         <Icon icon={SquareM} />
+        <strong style={{ fontSize: 'min(20px, 8vw)' }}>{"LOGIN WITH Microsoft"}</strong>
+         <Icon icon={SquareM} size={'normal'}/>
        </Flexbox>
      </Button>
-      <Button
+      {/* <Button
        
         // onClick={() => router.push('/chat')}
         size={'large'}
@@ -62,7 +63,7 @@ const Login = () => {
          {"LOGIN WITH EMAIL"}
          <Icon icon={Mails} />
         </Flexbox>
-      </Button>
+      </Button> */}
       </div>
     </Flexbox>
        
