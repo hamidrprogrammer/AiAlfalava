@@ -41,3 +41,4 @@ public/prompts.json
 .vscode
 .idea.env.local
 .env.local
+.env
